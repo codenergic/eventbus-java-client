@@ -8,8 +8,8 @@
 	<description>Java port of vertx3-eventbus-client.js</description>
 
 	<scm>
-		<connection>scm:git:ssh://git@github.com:codenergic/eventbus-java-client.git</connection>
-		<developerConnection>scm:git:ssh://git@github.com:codenergic/eventbus-java-client.git</developerConnection>
+		<connection>scm:git:ssh://git@github.com/codenergic/eventbus-java-client.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/codenergic/eventbus-java-client.git</developerConnection>
 		<url>https://github.com/codenergic/eventbus-java-client</url>
 	</scm>
 
