@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.codenergic.simcat</groupId>
 	<artifactId>eventbus-java-client</artifactId>
-	<version>0.1.0</version>
+	<version>0.1.1-SNAPSHOT</version>
 	<name>Vert.x EventBus Client</name>
 	<description>Java port of vertx3-eventbus-client.js</description>
 
@@ -10,7 +10,7 @@
 		<connection>scm:git:ssh://git@github.com/codenergic/eventbus-java-client.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/codenergic/eventbus-java-client.git</developerConnection>
 		<url>https://github.com/codenergic/eventbus-java-client</url>
-	  <tag>v0.1.0</tag>
+	  <tag>HEAD</tag>
   </scm>
 
 	<organization>
