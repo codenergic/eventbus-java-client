@@ -15,39 +15,96 @@
  */
 package org.codenergic.eventbus;
 
+import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
-import org.codenergic.eventbus.handler.ConnectionHandler;
-import org.codenergic.eventbus.handler.MessageHandler;
-import org.codenergic.eventbus.handler.ReplyHandler;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.neovisionaries.ws.client.WebSocket;
+import com.neovisionaries.ws.client.WebSocketFactory;
 
 public interface EventBus {
-	static int CONNECTING = 0;
-	static int OPEN = 1;
-	static int CLOSING = 2;
-	static int CLOSED = 3;
+	static EventBus newInstance(WebSocket webSocket, ObjectMapper objectMapper, int pingInterval) {
+		return new EventBusAdapter(webSocket, objectMapper, pingInterval);
+	}
 
-	void onOpen(ConnectionHandler connectionHandler);
+	static EventBus newInstance(WebSocket webSocket, ObjectMapper objectMapper) {
+		return newInstance(webSocket, objectMapper, 5000);
+	}
 
-	void onClose(ConnectionHandler connectionHandler);
+	static EventBus newInstance(WebSocket webSocket) {
+		return newInstance(webSocket, new ObjectMapper());
+	}
 
-	void send(String address, String message);
+	static EventBus newInstance(WebSocket webSocket, int pingInterval) {
+		return new EventBusAdapter(webSocket, new ObjectMapper(), pingInterval);
+	}
 
-	void send(String address, String message, Map<String, Object> headers);
+	static EventBus newInstance(String address, int pingInterval) {
+		try {
+			return newInstance(new WebSocketFactory().createSocket(address), pingInterval);
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 
-	void send(String address, String message, Map<String, Object> headers, ReplyHandler replyHandler);
+	static EventBus newInstance(String address) {
+		return newInstance(address, 5000);
+	}
+
+	void close();
+
+	void onClose(Consumer<EventBus> connectionHandler);
+
+	void onOpen(Consumer<EventBus> connectionHandler);
+
+	CompletableFuture<EventBus> open();
+
+	EventBus openSync();
+
+	default void publish(String address, String message) {
+		publish(address, message, null);
+	}
 
 	void publish(String address, String message, Map<String, Object> headers);
 
-	void registerHandler(String address, MessageHandler handler);
+	default void registerHandler(String address, Consumer<Message> handler) {
+		registerHandler(address, null, handler);
+	}
 
-	void registerHandler(String address, Map<String, Object> headers, MessageHandler handler);
+	default void registerHandler(String address, Consumer<Message> handler, BiConsumer<Message, Throwable> errorHandler) {
+		registerHandler(address, null, handler, errorHandler);
+	}
 
-	void unregisterHandler(String address, MessageHandler handler);
+	default void registerHandler(String address, Map<String, Object> headers, Consumer<Message> handler) {
+		registerHandler(address, headers, handler, (m, e) -> {
+			// do nothing
+		});
+	}
 
-	void unregisterHandler(String address, Map<String, Object> headers, MessageHandler handler);
+	void registerHandler(String address, Map<String, Object> headers, Consumer<Message> handler, BiConsumer<Message, Throwable> errorHandler);
 
-	EventBus open() throws Exception;
+	default void send(String address, String message) {
+		send(address, message, null);
+	}
 
-	void close();
+	default void send(String address, String message, Map<String, Object> headers) {
+		send(address, message, headers, null);
+	}
+
+	default void send(String address, String message, Map<String, Object> headers, Consumer<Message> replyHandler) {
+		send(address, message, headers, replyHandler, (m, e) -> {
+			// do nothing
+		});
+	}
+
+	void send(String address, String message, Map<String, Object> headers, Consumer<Message> replyHandler, BiConsumer<Message, Throwable> errorHandler);
+
+	default void unregisterHandler(String address, Consumer<Message> handler) {
+		unregisterHandler(address, null, handler);
+	}
+
+	void unregisterHandler(String address, Map<String, Object> headers, Consumer<Message> handler);
 }

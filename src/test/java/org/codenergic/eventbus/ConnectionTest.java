@@ -19,34 +19,44 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.codenergic.eventbus.handler.ConnectionHandler;
-import org.junit.Assert;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class ConnectionTest {
+	private String connectionAddress;
+
+	@After
+	public void after() {
+		TestHelper.stopServer();
+	}
+
+	@Before
+	public void before() throws InterruptedException {
+		connectionAddress = TestHelper.startServer();
+	}
+
 	@Test
-	public void testOpenAndCloseConnection() throws Exception {
-		final BlockingQueue<Boolean> connectionOpen = new ArrayBlockingQueue<Boolean>(1);
+	public void testOpenAndCloseConnectionAsynchronously() throws Exception {
+		EventBus eventBus = EventBus.newInstance(connectionAddress);
+		assertThat(eventBus.open().get(2, TimeUnit.SECONDS)).isEqualTo(eventBus);
+		eventBus.close();
+	}
 
-		EventBus eventBus = EventBusAdapter.connect("wss://simcat.herokuapp.com/eventbus/websocket");
-		eventBus.onOpen(new ConnectionHandler() {
-			@Override
-			public void handle() {
-				connectionOpen.add(true);
-			}
-		});
+	@Test
+	public void testOpenAndCloseConnectionSynchronously() throws Exception {
+		final BlockingQueue<Boolean> connectionOpen = new ArrayBlockingQueue<>(1);
 
-		eventBus.onClose(new ConnectionHandler() {
-			@Override
-			public void handle() {
-				connectionOpen.add(false);
-			}
-		});
+		EventBus eventBus = EventBus.newInstance(connectionAddress);
+		eventBus.onOpen((eb) -> connectionOpen.add(true));
+		eventBus.onClose((eb) -> connectionOpen.add(false));
 
-		eventBus.open();
-		Assert.assertTrue(connectionOpen.poll(5, TimeUnit.SECONDS));
+		assertThat(eventBus.openSync()).isEqualTo(eventBus);
+		assertThat(connectionOpen.poll(2, TimeUnit.SECONDS)).isNotNull().isTrue();
 
 		eventBus.close();
-		Assert.assertFalse(connectionOpen.poll(5, TimeUnit.SECONDS));
+		assertThat(connectionOpen.poll(2, TimeUnit.SECONDS)).isNotNull().isFalse();
 	}
 }

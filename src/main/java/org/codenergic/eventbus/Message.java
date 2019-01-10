@@ -13,79 +13,86 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.codenergic.eventbus.handler;
+package org.codenergic.eventbus;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonAutoDetect(fieldVisibility = Visibility.ANY, setterVisibility = Visibility.NONE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Message {
-	public static final String TYPE_SEND = "send";
-	public static final String TYPE_PUBLISH = "publish";
-	public static final String TYPE_REGISTER = "register";
-	public static final String TYPE_UNREGISTER = "unregister";
-
 	private String type;
 	private String address;
 	private Map<String, Object> headers;
 	private String body;
 	private String replyAddress;
-	private int failureCode;
+	private Integer failureCode;
 	private String failureType;
-	private String message;
+	private String failureMessage;
 
 	protected Message() {
 	}
 
-	public Message(String type, String address, Map<String, Object> headers, String body, String replyAddress) {
-		this.type = type;
+	public Message(MessageType type, String address, Map<String, Object> headers, String body, String replyAddress) {
+		this.type = type.getEventBusMessageType();
 		this.address = address;
-		this.headers = headers;
+		this.headers = Optional.ofNullable(headers).orElse(new HashMap<>());
 		this.body = body;
 		this.replyAddress = replyAddress;
 	}
 
-	public Message(String type, String address, Map<String, Object> headers, String body) {
+	public Message(MessageType type, String address, Map<String, Object> headers, String body) {
 		this(type, address, headers, body, null);
 	}
 
-	public Message(int failureCode, String failureType, String message) {
+	public Message(int failureCode, String failureType, String failureMessage) {
 		this.failureCode = failureCode;
 		this.failureType = failureType;
-		this.message = message;
-	}
-
-	public String getType() {
-		return type;
+		this.failureMessage = failureMessage;
 	}
 
 	public String getAddress() {
 		return address;
 	}
 
-	public Map<String, Object> getHeaders() {
-		return headers;
-	}
-
 	public String getBody() {
 		return body;
 	}
 
-	public String getReplyAddress() {
-		return replyAddress;
+	public Integer getFailureCode() {
+		return failureCode;
 	}
 
-	public int getFailureCode() {
-		return failureCode;
+	public String getFailureMessage() {
+		return failureMessage;
 	}
 
 	public String getFailureType() {
 		return failureType;
 	}
 
-	public String getMessage() {
-		return message;
+	public Map<String, Object> getHeaders() {
+		return headers;
+	}
+
+	public String getReplyAddress() {
+		return replyAddress;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public enum MessageType {
+		SEND, PUBLISH, REGISTER, UNREGISTER;
+
+		private String getEventBusMessageType() {
+			return name().toLowerCase();
+		}
 	}
 }
