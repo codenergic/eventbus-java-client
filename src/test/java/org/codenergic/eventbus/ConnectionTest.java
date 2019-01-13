@@ -41,7 +41,7 @@ public class ConnectionTest {
 	@Test
 	public void testOpenAndCloseConnectionAsynchronously() throws Exception {
 		EventBus eventBus = EventBus.newInstance(connectionAddress);
-		assertThat(eventBus.open().get(2, TimeUnit.SECONDS)).isEqualTo(eventBus);
+		assertThat(eventBus.open().get(5, TimeUnit.SECONDS)).isEqualTo(eventBus);
 		eventBus.close();
 	}
 
@@ -54,9 +54,9 @@ public class ConnectionTest {
 		eventBus.onClose((eb) -> connectionOpen.add(false));
 
 		assertThat(eventBus.openSync()).isEqualTo(eventBus);
-		assertThat(connectionOpen.poll(2, TimeUnit.SECONDS)).isNotNull().isTrue();
+		assertThat(connectionOpen.poll(5, TimeUnit.SECONDS)).isNotNull().isTrue();
 
 		eventBus.close();
-		assertThat(connectionOpen.poll(2, TimeUnit.SECONDS)).isNotNull().isFalse();
+		assertThat(connectionOpen.poll(5, TimeUnit.SECONDS)).isNotNull().isFalse();
 	}
 }

@@ -72,7 +72,7 @@ public class SendMessageTest {
 
 		eventBus.publish("test-address", body, headers);
 
-		boolean completed = latch.await(2, TimeUnit.SECONDS);
+		boolean completed = latch.await(5, TimeUnit.SECONDS);
 		assertThat(completed).isTrue();
 
 		assertThat(messages).hasSize(2);
@@ -99,7 +99,7 @@ public class SendMessageTest {
 		eventBus.send("test-address", body, headers);
 		eventBus.send("test-address", body);
 
-		boolean completed = latch.await(2, TimeUnit.SECONDS);
+		boolean completed = latch.await(5, TimeUnit.SECONDS);
 		assertThat(completed).isTrue();
 
 		assertThat(messages).hasSize(2);
@@ -127,7 +127,7 @@ public class SendMessageTest {
 			});
 		});
 
-		boolean sent = latch.await(2, TimeUnit.SECONDS);
+		boolean sent = latch.await(5, TimeUnit.SECONDS);
 		assertThat(sent).isTrue();
 		assertThat(messages.size()).isEqualTo(messageBodies.size());
 
@@ -166,7 +166,7 @@ public class SendMessageTest {
 		}));
 		eventBus.send("test-address", body);
 
-		assertThat(latch.await(1, TimeUnit.SECONDS)).isTrue();
+		assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue();
 
 		assertThat(messages).hasSize(2);
 		messages.forEach(message -> assertThat(message.getBody()).isEqualTo("test-address-" + body));
@@ -187,13 +187,13 @@ public class SendMessageTest {
 		eventBus.registerHandler("test-address-publish-reply", messageHandler);
 		eventBus.publish("test-address", "testing");
 
-		boolean sent = latch.await(1, TimeUnit.SECONDS);
+		boolean sent = latch.await(5, TimeUnit.SECONDS);
 		assertThat(sent).isFalse();
 
 		eventBus.unregisterHandler("test-address-publish-reply", messageHandler);
 		eventBus.publish("test-address", "testing");
 
-		sent = latch.await(1, TimeUnit.SECONDS);
+		sent = latch.await(5, TimeUnit.SECONDS);
 		assertThat(sent).isFalse();
 
 		assertThat(messages).hasSize(1);
