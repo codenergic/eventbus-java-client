@@ -187,13 +187,13 @@ public class SendMessageTest {
 		eventBus.registerHandler("test-address-publish-reply", messageHandler);
 		eventBus.publish("test-address", "testing");
 
-		boolean sent = latch.await(5, TimeUnit.SECONDS);
+		boolean sent = latch.await(2, TimeUnit.SECONDS);
 		assertThat(sent).isFalse();
 
 		eventBus.unregisterHandler("test-address-publish-reply", messageHandler);
 		eventBus.publish("test-address", "testing");
 
-		sent = latch.await(5, TimeUnit.SECONDS);
+		sent = latch.await(2, TimeUnit.SECONDS);
 		assertThat(sent).isFalse();
 
 		assertThat(messages).hasSize(1);

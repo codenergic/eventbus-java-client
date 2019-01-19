@@ -15,8 +15,7 @@
  */
 package org.codenergic.eventbus;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
@@ -47,16 +46,15 @@ public class ConnectionTest {
 
 	@Test
 	public void testOpenAndCloseConnectionSynchronously() throws Exception {
-		final BlockingQueue<Boolean> connectionOpen = new ArrayBlockingQueue<>(1);
+		final CountDownLatch latch = new CountDownLatch(2);
 
 		EventBus eventBus = EventBus.newInstance(connectionAddress);
-		eventBus.onOpen((eb) -> connectionOpen.add(true));
-		eventBus.onClose((eb) -> connectionOpen.add(false));
+		eventBus.onOpen((eb) -> latch.countDown());
+		eventBus.onClose((eb) -> latch.countDown());
 
 		assertThat(eventBus.openSync()).isEqualTo(eventBus);
-		assertThat(connectionOpen.poll(5, TimeUnit.SECONDS)).isNotNull().isTrue();
-
 		eventBus.close();
-		assertThat(connectionOpen.poll(5, TimeUnit.SECONDS)).isNotNull().isFalse();
+
+		assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue();
 	}
 }
