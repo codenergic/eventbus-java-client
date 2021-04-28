@@ -1,0 +1,21 @@
+version: 2
+updates:
+- package-ecosystem: maven
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "22:00"
+  open-pull-requests-limit: 10
+  reviewers:
+  - dianw
+  - diaxz
+  - vickyfaizal
+  ignore:
+  - dependency-name: com.neovisionaries:nv-websocket-client
+    versions:
+    - "2.11"
+    - "2.12"
+    - "2.13"
+  - dependency-name: io.vertx:vertx-web
+    versions:
+    - 3.8.1
